@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRoute from "./routes/userRoute.js";
+import connectDB from "./config/db.js";
+import employeRoute from "./routes/employeeRoutes.js";
 // Load environment variables
 dotenv.config();
 
@@ -11,8 +13,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// mongo connection
+connectDB();
+
 // Routes
 app.use("/api/users", userRoute);
+app.use("/api/employees", employeRoute);
 app.get("/", (req, res) => {
   res.send("🚀 Server is running with import syntax!");
 });
