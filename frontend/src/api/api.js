@@ -1,11 +1,8 @@
-// src/api/index.js (or api.js)
-
 import axios from "axios";
 
-// Create an instance of axios for the base API URL
 const api = axios.create({
-  baseURL: "/api", // Define your base API URL
-  withCredentials: true, // Send credentials (cookies) with requests
+  baseURL: "/api",
+  withCredentials: true,
 });
 
 // Login APIs
@@ -26,14 +23,49 @@ export const getEmployees = async () => {
 };
 
 export const createEmployee = async (employee) => {
-  const res = await api.post("/employees", employee);
-  return res.data;
+  try {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("No authorization token found");
+    }
+
+    console.log("Sending employee:", employee);
+
+    const res = await api.post("/employees", employee, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("❌ Server responded with:", error.response?.data);
+    console.error("❌ Full error object:", error);
+    throw error;
+  }
 };
 
 // Transaction APIs
 export const createTransaction = async (data) => {
-  const res = await api.post("/transactions", data);
-  return res.data;
+  try {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("No authorization token found");
+    }
+
+    const res = await api.post("/transactions", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    throw error;
+  }
 };
 
 export const getEmployeeTransactions = async (id) => {
@@ -82,6 +114,29 @@ export const getSummaryReport = async () => {
 
     // Use axios to make the GET request with the Authorization header
     const response = await api.get("/reports/summary", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Return the response data
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching report data:", error);
+    throw error; // Rethrow the error so it can be handled by the caller
+  }
+};
+export const getSummaryById = async (employeeId) => {
+  try {
+    // Get the token from localStorage
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("No authorization token found");
+    }
+
+    // Use axios to make the GET request with the Authorization header
+    const response = await api.get(`/reports/employee/${employeeId}`, {
       headers: {
         Authorization: `Bearer ${token}`, // Add the token here in the headers
       },

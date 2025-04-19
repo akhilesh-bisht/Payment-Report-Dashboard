@@ -39,9 +39,9 @@ function Dashboard() {
       </div>
 
       {/* Payment Report Modal */}
-      {/* {showPaymentReport && (
+      {showPaymentReport && (
         <PaymentReportModal onClose={() => setShowPaymentReport(false)} />
-      )} */}
+      )}
     </div>
   );
 }

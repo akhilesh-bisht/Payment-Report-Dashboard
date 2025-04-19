@@ -39,6 +39,7 @@ export const getPaginatedEntries = async (req, res) => {
     const totalPages = Math.ceil(totalEntries / limit);
 
     const entries = transactions.map((tx) => ({
+      id: tx.employee,
       location: tx.employee.location,
       empId: tx.employee.employeeId,
       empName: tx.employee.name,
