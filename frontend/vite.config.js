@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:4500",
+        target: "https://payment-report-dashboard.onrender.com",
         changeOrigin: true,
         secure: false,
       },
