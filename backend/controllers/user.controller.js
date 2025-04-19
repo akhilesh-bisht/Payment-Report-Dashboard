@@ -1,48 +1,5 @@
 import { User } from "../models/user.model.js";
 
-// Register User
-export const registerUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Validate input
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Email and password are required." });
-    }
-
-    // Normalize email
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // Check if user exists
-    const exists = await User.findOne({ email: normalizedEmail });
-    if (exists) {
-      return res
-        .status(400)
-        .json({ error: "User already exists. Please log in." });
-    }
-
-    // Validate password
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 6 characters long." });
-    }
-
-    // Create new user
-    const newUser = await User.create({ email: normalizedEmail, password });
-
-    res.status(201).json({
-      message: "User registered successfully",
-      user: { _id: newUser._id, email: newUser.email },
-    });
-  } catch (error) {
-    console.error("Registration Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 // Login User
 export const loginUser = async (req, res) => {
   try {

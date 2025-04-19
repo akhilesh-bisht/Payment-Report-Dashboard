@@ -24,6 +24,7 @@ app.use("/api/users", userRoute);
 app.use("/api/employees", employeRoute);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/reports", reportRoutes);
+
 app.get("/", (req, res) => {
   res.send("🚀 Server is running with import syntax!");
 });
