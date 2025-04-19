@@ -29,10 +29,21 @@ export const loginUser = async (req, res) => {
       await user.save();
       console.log("New user created:", user);
 
+      // Generate an access token for the new user
+      const accessToken = user.generateAccessToken();
+
+      // Set the access token in the secure cookie
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+      });
+
       // Respond with a success message
       return res.status(201).json({
         message: "User created successfully. Welcome!",
         user: { _id: user._id, email: user.email },
+        accessToken, // Send the access token back in the response
       });
     }
 
@@ -42,7 +53,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Generate an access token for the user
+    // Generate an access token for the existing user
     const accessToken = user.generateAccessToken();
 
     // Set the access token in the secure cookie
