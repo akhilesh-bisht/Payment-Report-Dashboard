@@ -1,11 +1,12 @@
 import Transaction from "../models/Transaction.js";
-import Employee from "../models/Employee.js";
+import Employee from "../models/employee.model.js";
 
 export const createTransaction = async (req, res) => {
   try {
-    const { employeeId, collectionAmount, depositAmount, date } = req.body;
+    const { employeeId, collectionAmount, depositAmount, date, depositDate } =
+      req.body;
 
-    if (!employeeId || !date) {
+    if (!employeeId || !date || !depositDate) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -19,6 +20,7 @@ export const createTransaction = async (req, res) => {
       collectionAmount,
       depositAmount,
       date,
+      depositDate,
       user: req.user._id, // admin user
     });
 

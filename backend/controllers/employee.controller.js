@@ -1,9 +1,9 @@
 import Employee from "../models/employee.model.js";
 
-// ✅ Add a new employee
+//  Add a new employee
 export const createEmployee = async (req, res) => {
   try {
-    const { name, employeeId } = req.body;
+    const { name, employeeId, location } = req.body;
 
     const existing = await Employee.findOne({ employeeId });
     if (existing) {
@@ -13,6 +13,7 @@ export const createEmployee = async (req, res) => {
     const newEmployee = new Employee({
       name,
       employeeId,
+      location,
       user: req.user._id, // assuming auth middleware sets req.user
     });
 

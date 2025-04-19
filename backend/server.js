@@ -4,6 +4,9 @@ import cors from "cors";
 import userRoute from "./routes/userRoute.js";
 import connectDB from "./config/db.js";
 import employeRoute from "./routes/employeeRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+
 // Load environment variables
 dotenv.config();
 
@@ -19,6 +22,8 @@ connectDB();
 // Routes
 app.use("/api/users", userRoute);
 app.use("/api/employees", employeRoute);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/reports", reportRoutes);
 app.get("/", (req, res) => {
   res.send("🚀 Server is running with import syntax!");
 });
