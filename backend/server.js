@@ -12,9 +12,26 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Only keep the custom CORS setup
-const allowedOrigin = "https://payment-report-dashboard.vercel.app/";
+const allowedOrigin = "https://payment-report-dashboard.vercel.app";
 
+// CORS fix: Set headers manually
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// Also use CORS middleware
 app.use(
   cors({
     origin: allowedOrigin,

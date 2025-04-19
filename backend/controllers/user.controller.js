@@ -22,7 +22,7 @@ export const loginUser = async (req, res) => {
       // Create a new user
       user = new User({
         email: normalizedEmail,
-        password, // In a real app, hash the password before saving it
+        password,
       });
 
       // Save the new user to the database
