@@ -13,8 +13,21 @@ export const loginUser = async (email, password) => {
 };
 
 export const logoutUser = async () => {
-  const res = await api.post("/users/logout");
-  return res.data;
+  try {
+    const res = await api.post("/users/logout", null, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+
+    // Clear accessToken
+    localStorage.removeItem("accessToken");
+
+    return res.data;
+  } catch (error) {
+    console.error("Logout failed", error);
+    throw error;
+  }
 };
 
 // Employee APIs
