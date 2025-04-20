@@ -100,7 +100,6 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
             placeholder="Employee ID"
             required
             className="w-full border rounded p-2"
-            readOnly
           />
           <input
             name="location"

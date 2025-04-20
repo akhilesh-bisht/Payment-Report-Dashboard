@@ -1,14 +1,9 @@
 import Employee from "../models/employee.model.js";
 
-//  Add a new employee
+//  Add a new employee (allow duplicates)
 export const createEmployee = async (req, res) => {
   try {
     const { name, employeeId, location } = req.body;
-
-    const existing = await Employee.findOne({ employeeId });
-    if (existing) {
-      return res.status(400).json({ message: "Employee ID already exists" });
-    }
 
     const newEmployee = new Employee({
       name,
@@ -24,7 +19,7 @@ export const createEmployee = async (req, res) => {
   }
 };
 
-// ✅ Get all employees of logged-in user (admin)
+//  Get all employees of the logged-in user
 export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find({ user: req.user._id });
@@ -34,7 +29,7 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// ✅ Get a single employee (by ID)
+//  Get a single employee by ID (only if it belongs to the user)
 export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findOne({
