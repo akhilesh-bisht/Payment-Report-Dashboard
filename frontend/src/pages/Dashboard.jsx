@@ -8,11 +8,12 @@ import PaymentReportModal from "../components/PaymentReportModel.jsx";
 import { ChevronDown } from "../components/Icons";
 import { logoutUser } from "../api/api.js";
 
-function Dashboard() {
+function Dashboard({ onLogout }) {
   const [showPaymentReport, setShowPaymentReport] = useState(false);
   const navigate = useNavigate(); // or useRouter()
 
   const handleLogout = async () => {
+    onLogout();
     const success = await logoutUser();
     if (success) {
       navigate("/login");
