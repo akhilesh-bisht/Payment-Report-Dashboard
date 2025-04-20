@@ -39,7 +39,7 @@ function OutstandingReport({ onOpenPaymentReport }) {
     }
 
     fetchData();
-  }, []);
+  }, [InsertEmployeeAndTransaction, getAllReport, getSummaryReport]);
 
   const handleRowClick = (_id, name, empId, location) => {
     setSelectedEmployee({ _id, name, empId, location });
