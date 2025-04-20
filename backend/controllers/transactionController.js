@@ -1,9 +1,6 @@
 import Transaction from "../models/Transaction.js";
 import Employee from "../models/employee.model.js";
 
-import Transaction from "../models/Transaction.js";
-import Employee from "../models/employee.model.js";
-
 export const createTransaction = async (req, res) => {
   try {
     const { employeeId, collectionAmount, depositAmount, date, depositDate } =
