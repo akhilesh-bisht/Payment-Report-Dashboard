@@ -1,5 +1,6 @@
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
+const navigate = useNavigate();
 const api = axios.create({
   baseURL: "https://payment-report-dashboard.onrender.com/api",
   // baseURL: "api",
@@ -22,7 +23,7 @@ export const logoutUser = async () => {
 
     // Clear accessToken
     localStorage.removeItem("accessToken");
-
+    navigate("/login");
     return res.data;
   } catch (error) {
     console.error("Logout failed", error);
