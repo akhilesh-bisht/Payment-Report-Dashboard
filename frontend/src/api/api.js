@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://payment-report-dashboard.onrender.com/api",
+  // baseURL: "api",
   withCredentials: true,
 });
 

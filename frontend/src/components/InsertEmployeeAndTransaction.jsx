@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createEmployee, createTransaction } from "../api/api.js";
+import { createEmployee, createTransaction, getAllReport } from "../api/api.js";
 
 function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
   const [employeeData, setEmployeeData] = useState({
@@ -17,17 +17,52 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
     depositDate: "",
   });
 
+  const [employeeList, setEmployeeList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const getNextEmployeeId = (currentId = 6) => {
-    return `EMP${currentId.toString().padStart(3, "0")}`;
-  };
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [isNewEmployee, setIsNewEmployee] = useState(false);
 
   useEffect(() => {
-    const nextId = getNextEmployeeId(8);
-    setEmployeeData((prev) => ({ ...prev, employeeId: nextId }));
+    const fetchEmployeeList = async () => {
+      try {
+        const response = await getAllReport();
+        if (response.entries && Array.isArray(response.entries)) {
+          setEmployeeList(response.entries);
+        } else {
+          console.error(
+            "Entries from getAllReport are not in expected format:",
+            response
+          );
+          setError("Failed to load employee data.");
+        }
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+        setError("Failed to load employee data.");
+      }
+    };
+
+    fetchEmployeeList();
   }, []);
+
+  const handleEmployeeSelect = (e) => {
+    const selectedId = e.target.value;
+
+    if (selectedId === "new") {
+      setIsNewEmployee(true);
+      setSelectedEmployee(null);
+      setEmployeeData({ name: "", employeeId: "", location: "" });
+    } else {
+      setIsNewEmployee(false);
+      const employee = employeeList.find((emp) => emp.id._id === selectedId);
+      setSelectedEmployee(employee);
+      setEmployeeData({
+        name: employee.id.name,
+        employeeId: employee.id.employeeId,
+        location: employee.id.location,
+      });
+    }
+  };
 
   const handleEmployeeChange = (e) => {
     const { name, value } = e.target;
@@ -45,30 +80,37 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
     setError("");
 
     try {
-      // 1. Create employee
-      const employeeRes = await createEmployee(employeeData);
-      const employeeMongoId = employeeRes._id;
+      let employeeMongoId;
+      let employeeRes;
 
-      // 2. Map transaction with correct fields
+      if (isNewEmployee) {
+        employeeRes = await createEmployee(employeeData);
+        employeeMongoId = employeeRes._id;
+      } else if (
+        selectedEmployee &&
+        selectedEmployee.id &&
+        selectedEmployee.id._id
+      ) {
+        employeeMongoId = selectedEmployee.id._id;
+      } else {
+        throw new Error("No valid employee selected or employee has no ID");
+      }
+
       const newTransactionData = {
         employeeId: employeeMongoId,
         collectionAmount: transactionData.collectionAmount,
         depositAmount: transactionData.depositAmount,
-        date: transactionData.collectionDate, // Mapped correctly
+        date: transactionData.collectionDate,
         depositDate: transactionData.depositDate,
       };
+      console.log("New transaction data:", newTransactionData);
 
-      console.log("Sending transaction:", newTransactionData);
-
-      //  3. Create transaction
       const transactionRes = await createTransaction(newTransactionData);
-
-      //  4. Callbacks
       onSuccess?.({ employeeRes, transactionRes });
       onClose?.();
     } catch (err) {
-      console.error(err);
-      setError("Failed to insert data. Please try again.");
+      console.error("Error submitting transaction:", err);
+      setError("Failed to insert transaction data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -79,39 +121,70 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
       <h2 className="text-xl font-semibold mb-4">
         Insert Employee & Transaction
       </h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Employee Form Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-700">
-            Employee Details
-          </h3>
-          <input
-            name="name"
-            value={employeeData.name}
-            onChange={handleEmployeeChange}
-            placeholder="Employee Name"
-            required
+          <h3 className="text-lg font-medium text-gray-700">Select Employee</h3>
+          <select
             className="w-full border rounded p-2"
-          />
-          <input
-            name="employeeId"
-            value={employeeData.employeeId}
-            onChange={handleEmployeeChange}
-            placeholder="Employee ID"
+            onChange={handleEmployeeSelect}
             required
-            className="w-full border rounded p-2"
-          />
-          <input
-            name="location"
-            value={employeeData.location}
-            onChange={handleEmployeeChange}
-            placeholder="Location"
-            required
-            className="w-full border rounded p-2"
-          />
+          >
+            <option value="">Select an employee</option>
+            <option value="new">➕ Add New Employee</option>
+            {employeeList.map((employee) => (
+              <option key={employee.id._id} value={employee.id._id}>
+                {employee.empName} ({employee.empId})
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Transaction Form Section */}
+        {isNewEmployee ? (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-700">
+              New Employee Details
+            </h3>
+            <input
+              name="name"
+              value={employeeData.name}
+              onChange={handleEmployeeChange}
+              placeholder="Employee Name"
+              required
+              className="w-full border rounded p-2"
+            />
+            <input
+              name="employeeId"
+              value={employeeData.employeeId}
+              onChange={handleEmployeeChange}
+              placeholder="Employee ID"
+              required
+              className="w-full border rounded p-2"
+            />
+            <input
+              name="location"
+              value={employeeData.location}
+              onChange={handleEmployeeChange}
+              placeholder="Location"
+              required
+              className="w-full border rounded p-2"
+            />
+          </div>
+        ) : (
+          selectedEmployee && (
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-gray-700">
+                Selected Employee
+              </h3>
+              <p className="font-semibold">{selectedEmployee.empName}</p>
+              <p className="text-sm text-gray-500">{selectedEmployee.empId}</p>
+              <p className="text-sm text-gray-500">
+                Location: {selectedEmployee.location}
+              </p>
+            </div>
+          )
+        )}
+
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-700">
             Transaction Details
@@ -122,6 +195,7 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
             value={transactionData.collectionAmount}
             onChange={handleTransactionChange}
             placeholder="Collection Amount"
+            required
             className="w-full border rounded p-2"
           />
           <input
@@ -129,6 +203,7 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
             type="date"
             value={transactionData.collectionDate}
             onChange={handleTransactionChange}
+            required
             className="w-full border rounded p-2"
           />
           <input
@@ -137,6 +212,7 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
             value={transactionData.depositAmount}
             onChange={handleTransactionChange}
             placeholder="Deposit Amount"
+            required
             className="w-full border rounded p-2"
           />
           <input
@@ -144,6 +220,7 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
             type="date"
             value={transactionData.depositDate}
             onChange={handleTransactionChange}
+            required
             className="w-full border rounded p-2"
           />
         </div>
@@ -155,7 +232,7 @@ function InsertEmployeeAndTransaction({ onClose, onSuccess }) {
           className="bg-[#664895] text-white px-4 py-2 rounded hover:bg-[#553a7a]"
           disabled={loading}
         >
-          {loading ? "Submitting..." : "Submit Both"}
+          {loading ? "Submitting..." : "Submit Transaction"}
         </button>
       </form>
     </div>
